@@ -266,7 +266,7 @@ function App() {
             <>
               <div className="download-buttons">
                 <button onClick={() => generateWordDoc(processedResults)}>Download Word Report</button>
-                <button onClick={() => generateEmailFile(processedResults)}>Download Email Draft</button>
+                <button onClick={() => generateEmailFile(processedResults)}>Download Table (Word)</button>
               </div>
               <ul className="results-list">
                 {processedResults.map((res, i) => (

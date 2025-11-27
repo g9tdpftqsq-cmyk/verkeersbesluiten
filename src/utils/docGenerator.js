@@ -41,19 +41,16 @@ export const generateWordDoc = async (items) => {
 
         // List of addresses in this district
         districts[districtName].forEach(item => {
+            // Clean up address: remove extra spaces before opening parenthesis
+            let cleanAddress = item.address.replace(/\s+\(/g, ' (');
+
             children.push(
                 new Paragraph({
-                    text: `${item.address} (Datum: ${item.date || 'Onbekend'})`,
+                    text: cleanAddress,
                     bullet: {
                         level: 0,
                     },
-                }),
-                // Optional: Add link in a separate line or same line?
-                // User said "puntsgewijs alle adressen per wijk".
-                // Let's keep it simple. Maybe add the link as a sub-bullet or just text?
-                // Let's add the link in a separate paragraph below or just keep it clean.
-                // "adres pak je tot de ; en daar plaats je een ) om hem netjes af te sluiten"
-                // The address already has the closing parenthesis from the parser.
+                })
             );
         });
     });

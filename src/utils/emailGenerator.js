@@ -1,80 +1,72 @@
-import { saveAs } from "file-saver";
+import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, HeadingLevel } from 'docx';
+import { saveAs } from 'file-saver';
 
-export const generateEmailFile = (items) => {
-  // items is an array of { district, address, sourceUrl, date, ... }
-  console.log(`Generating email file for ${items.length} items:`, items);
+export const generateEmailFile = async (items) => {
+  console.log("Generating email table document...");
 
-  if (!items || items.length === 0) {
-    console.error("No items to generate email for!");
-    alert("No data to generate email. Please process some addresses first.");
-    return;
-  }
+  const tableRows = [
+    // Header row
+    new TableRow({
+      children: [
+        new TableCell({
+          children: [new Paragraph({ text: "Adres", bold: true })],
+          width: { size: 35, type: WidthType.PERCENTAGE }
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Wijk", bold: true })],
+          width: { size: 20, type: WidthType.PERCENTAGE }
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "Datum", bold: true })],
+          width: { size: 15, type: WidthType.PERCENTAGE }
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: "URL", bold: true })],
+          width: { size: 30, type: WidthType.PERCENTAGE }
+        })
+      ]
+    })
+  ];
 
-  const tableRows = items.map(item => `
-    <tr>
-      <td>${item.address || 'Onbekend'}</td>
-      <td>${item.district || 'Onbekend'}</td>
-      <td>${item.date || 'Onbekend'}</td>
-      <td><a href="${item.sourceUrl}">Link</a></td>
-    </tr>
-  `).join('');
-
-  const htmlBody = `
-    <html>
-      <body>
-        <p>Beste redactie,</p>
-        <p>Hierbij een overzicht van de gevonden verkeersbesluiten:</p>
-        <table border="1" cellpadding="5" cellspacing="0">
-          <thead>
-            <tr>
-              <th>Adres</th>
-              <th>Wijk</th>
-              <th>Datum</th>
-              <th>Link</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-          </tbody>
-        </table>
-        <p>Met vriendelijke groet,</p>
-      </body>
-    </html>
-  `;
-
-  const emlContent = `To: redactie@utrecht.nl
-Subject: Overzicht Verkeersbesluiten
-Content-Type: text/html; charset="UTF-8"
-
-${htmlBody}
-`;
-
-  console.log("Creating email blob...");
-  const blob = new Blob([emlContent], {
-    type: "message/rfc822"
+  // Data rows
+  items.forEach(item => {
+    tableRows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [new Paragraph(item.address || "Niet gevonden")],
+          }),
+          new TableCell({
+            children: [new Paragraph(item.district || "Niet gevonden")],
+          }),
+          new TableCell({
+            children: [new Paragraph(item.date || "Onbekend")],
+          }),
+          new TableCell({
+            children: [new Paragraph(item.sourceUrl || "")],
+          })
+        ]
+      })
+    );
   });
-  console.log("Email blob created, size:", blob.size, "bytes");
 
-  // Add timestamp to filename
-  const timestamp = new Date().toISOString().split('T')[0];
-  const filename = `Verkeersbesluiten_${timestamp}.eml`;
+  const doc = new Document({
+    sections: [{
+      children: [
+        new Paragraph({
+          text: "Verkeersbesluiten Overzicht",
+          heading: HeadingLevel.HEADING_1,
+        }),
+        new Paragraph({ text: "" }), // Spacer
+        new Table({
+          rows: tableRows,
+          width: { size: 100, type: WidthType.PERCENTAGE }
+        })
+      ]
+    }]
+  });
 
-  console.log("Triggering email download:", filename);
-
-  // Use manual download link for better compatibility
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.style.display = 'none';
-  document.body.appendChild(link);
-  link.click();
-
-  // Cleanup
-  setTimeout(() => {
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }, 100);
-
-  console.log("Email download triggered!");
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, `verkeersbesluiten_tabel_${new Date().toISOString().split('T')[0]}.docx`);
+  console.log("Email table document generated!");
 };
