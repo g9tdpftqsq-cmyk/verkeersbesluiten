@@ -55,6 +55,7 @@ input[type="date"]:focus {
   border-color: #667eea;
 }
 
+
 .content-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

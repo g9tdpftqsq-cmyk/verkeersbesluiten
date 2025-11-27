@@ -175,11 +175,9 @@ function App() {
     <div className="container">
       <h1>Verkeersbesluiten handmatig invoeren? Nah..</h1>
 
-
-
-      <div className="content-grid">
-        <div className="panel">
-          <h2>1. Upload Word Bestanden</h2>
+      <div className="single-column">
+        <div className="panel main-panel">
+          <h2>Upload Word Bestanden</h2>
 
           <div className="upload-section">
             <p>Upload Word bestanden met verkeersbesluiten:</p>
@@ -203,45 +201,47 @@ function App() {
               <div className="action-buttons">
                 <button onClick={() => { setAddresses([]); setProcessedResults([]); setLogs([]); }}>Clear</button>
                 <button className="primary-btn" onClick={handleProcessAll} disabled={processing}>
-                  {processing ? 'Bezig...' : 'LET\'S GO! 🚀'}
+                  {processing ? 'Bezig...' : 'Bespaar tijd 🚀'}
                 </button>
               </div>
             </>
           )}
         </div>
 
-        <div className="panel">
-          <h2>2. Results & Downloads</h2>
+        {/* Results section - only show after processing */}
+        {(processing || processedResults.length > 0) && (
+          <div className="panel results-panel">
+            <h2>Resultaten</h2>
 
-          {processing && (
-            <div className="loading-screen">
-              <div className="spinner-container">
-                <img src="/utrecht-logo.png" alt="Utrecht" className="spinning-logo" />
+            {processing && (
+              <div className="loading-screen">
+                <div className="spinner-container">
+                  <img src="/utrecht-logo.png" alt="Utrecht" className="spinning-logo" />
+                </div>
+                <h2 className="motivational-message">{motivationalMessage}</h2>
               </div>
-              <h2 className="motivational-message">{motivationalMessage}</h2>
-            </div>
-          )}
+            
+            {processedResults.length === 0 && !processing && null}
 
-          {processedResults.length === 0 && !processing && <p>Geen resultaten. Upload Word bestanden en klik op LET'S GO!</p>}
-
-          {processedResults.length > 0 && !processing && (
-            <>
-              <div className="download-buttons">
-                <button onClick={() => generateWordDoc(processedResults)}>📄 Wijkbericht</button>
-                <button onClick={() => generateEmailFile(processedResults)}>📧 Redactie mail</button>
-              </div>
-              <ul className="results-list">
-                {processedResults.map((res, i) => (
-                  <li key={i}>
-                    <strong>{res.originalAddress}</strong> -&gt; {res.address} ({res.district})
-                    <br />
-                    <a href={res.sourceUrl} target="_blank" rel="noopener noreferrer">View Source</a>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
+            {processedResults.length > 0 && !processing && (
+              <>
+                <div className="download-buttons">
+                  <button onClick={() => generateWordDoc(processedResults)}>📄 Wijkbericht</button>
+                  <button onClick={() => generateEmailFile(processedResults)}>📧 Redactie mail</button>
+                </div>
+                <ul className="results-list">
+                  {processedResults.map((res, i) => (
+                    <li key={i}>
+                      <strong>{res.originalAddress}</strong> -&gt; {res.address} ({res.district})
+                      <br />
+                      <a href={res.sourceUrl} target="_blank" rel="noopener noreferrer">View Source</a>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
