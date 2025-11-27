@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://zoek.officielebekendmakingen.nl/:path*"
+    }
+  ]
+}
