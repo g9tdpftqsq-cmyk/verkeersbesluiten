@@ -220,7 +220,8 @@ function App() {
                 </div>
                 <h2 className="motivational-message">{motivationalMessage}</h2>
               </div>
-            
+            )}
+
             {processedResults.length === 0 && !processing && null}
 
             {processedResults.length > 0 && !processing && (
