@@ -221,19 +221,6 @@ function App() {
               <h2 className="motivational-message">{motivationalMessage}</h2>
             </div>
           )}
-          {/* Logs Section */}
-          <div className="logs-container" style={{ maxHeight: '200px', overflowY: 'auto', background: '#f5f5f5', padding: '10px', marginBottom: '10px', borderRadius: '4px', fontSize: '0.9em' }}>
-            {logs.length === 0 && <p style={{ color: '#888' }}>Process logs will appear here...</p>}
-            {logs.map((log, i) => (
-              <div key={i} style={{
-                color: log.type === 'error' ? 'red' : log.type === 'success' ? 'green' : log.type === 'warning' ? 'orange' : 'black',
-                marginBottom: '4px'
-              }}>
-                <span style={{ color: '#999', marginRight: '8px' }}>[{log.timestamp}]</span>
-                {log.message}
-              </div>
-            ))}
-          </div>
 
           {processedResults.length === 0 && !processing && <p>Geen resultaten. Upload Word bestanden en klik op LET'S GO!</p>}
 
