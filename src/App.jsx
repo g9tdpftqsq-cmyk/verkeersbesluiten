@@ -173,18 +173,9 @@ function App() {
 
   return (
     <div className="container">
-      <h1>Official Announcements Scraper</h1>
+      <h1>Verkeersbesluiten handmatig invoeren? Nah..</h1>
 
-      <div className="controls">
-        <label>Publication Date (approx): </label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-        {/* Optional manual fetch */}
-        {/* <button onClick={handleFetch} disabled={loading}>Fetch All (Debug)</button> */}
-      </div>
+
 
       <div className="content-grid">
         <div className="panel">
