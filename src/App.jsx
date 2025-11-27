@@ -12,8 +12,6 @@ function App() {
   const [announcements, setAnnouncements] = useState([])
   const [addresses, setAddresses] = useState([])
   const [loading, setLoading] = useState(false)
-  const [ocrLoading, setOcrLoading] = useState(false)
-  const [imagePreview, setImagePreview] = useState(null)
   const [processedResults, setProcessedResults] = useState([])
   const [processing, setProcessing] = useState(false)
   const [logs, setLogs] = useState([])
@@ -39,42 +37,14 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    const handlePaste = async (e) => {
-      const items = e.clipboardData.items
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1) {
-          const blob = items[i].getAsFile()
-          setImagePreview(URL.createObjectURL(blob))
-          setOcrLoading(true)
-          addLog("Processing pasted image...", 'info');
-          try {
-            const extracted = await extractAddresses(blob)
-            setAddresses(prev => [...prev, ...extracted])
-            addLog(`Extracted ${extracted.length} addresses from image.`, 'success');
-          } catch (err) {
-            console.error(err)
-            addLog(`OCR Failed: ${err.message}`, 'error');
-            alert('OCR Failed')
-          } finally {
-            setOcrLoading(false)
-          }
-        }
-      }
-    }
 
-    window.addEventListener('paste', handlePaste)
-    return () => {
-      window.removeEventListener('paste', handlePaste)
-    }
-  }, [])
 
   const handleWordUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
 
-    setOcrLoading(true); // Reuse loading state
+    setLoading(true);
     addLog(`Processing ${files.length} Word files...`, 'info');
     try {
       const newAddresses = [];
@@ -100,7 +70,7 @@ function App() {
       addLog(`Word upload failed: ${error.message}`, 'error');
       alert("Failed to process Word files.");
     } finally {
-      setOcrLoading(false);
+      setLoading(false);
     }
   };
 
@@ -218,23 +188,16 @@ function App() {
 
       <div className="content-grid">
         <div className="panel">
-          <h2>1. Paste Screenshot (Ctrl+V)</h2>
-          {imagePreview && (
-            <div className="image-preview-container">
-              <img src={imagePreview} alt="Pasted" className="image-preview" />
-            </div>
-          )}
-          {ocrLoading && <p>Processing image...</p>}
-          {addresses.length === 0 && !ocrLoading && !imagePreview && <p className="placeholder">Paste an image anywhere</p>}
+          <h2>1. Upload Word Bestanden</h2>
 
           <div className="upload-section">
-            <p>Or upload Word files (max 50):</p>
+            <p>Upload Word bestanden met verkeersbesluiten:</p>
             <input
               type="file"
               multiple
               accept=".docx"
               onChange={handleWordUpload}
-              disabled={ocrLoading || processing}
+              disabled={loading || processing}
             />
           </div>
 
@@ -247,7 +210,7 @@ function App() {
                 ))}
               </ul>
               <div className="action-buttons">
-                <button onClick={() => { setAddresses([]); setImagePreview(null); setProcessedResults([]); setLogs([]); }}>Clear</button>
+                <button onClick={() => { setAddresses([]); setProcessedResults([]); setLogs([]); }}>Clear</button>
                 <button className="primary-btn" onClick={handleProcessAll} disabled={processing}>
                   {processing ? 'Bezig...' : 'LET\'S GO! 🚀'}
                 </button>
@@ -281,7 +244,7 @@ function App() {
             ))}
           </div>
 
-          {processedResults.length === 0 && !processing && <p>Geen resultaten. Plak een afbeelding of upload Word bestanden en klik op LET'S GO!</p>}
+          {processedResults.length === 0 && !processing && <p>Geen resultaten. Upload Word bestanden en klik op LET'S GO!</p>}
 
           {processedResults.length > 0 && !processing && (
             <>
