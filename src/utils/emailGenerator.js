@@ -4,6 +4,18 @@ import { saveAs } from 'file-saver';
 export const generateEmailFile = async (items) => {
   console.log("Generating email table document...");
 
+  // Helper function to format date as text
+  const formatDateAsText = (dateStr) => {
+    if (!dateStr) return "Onbekend";
+    const months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni',
+      'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+    const date = new Date(dateStr);
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
   const tableRows = [
     // Header row
     new TableRow({
@@ -30,17 +42,20 @@ export const generateEmailFile = async (items) => {
 
   // Data rows
   items.forEach(item => {
+    // Clean up address: remove extra spaces
+    const cleanAddress = (item.address || "Niet gevonden").replace(/\s+/g, ' ').trim();
+
     tableRows.push(
       new TableRow({
         children: [
           new TableCell({
-            children: [new Paragraph(item.address || "Niet gevonden")],
+            children: [new Paragraph(cleanAddress)],
           }),
           new TableCell({
             children: [new Paragraph(item.district || "Niet gevonden")],
           }),
           new TableCell({
-            children: [new Paragraph(item.date || "Onbekend")],
+            children: [new Paragraph(formatDateAsText(item.date))],
           }),
           new TableCell({
             children: [new Paragraph(item.sourceUrl || "")],
@@ -54,10 +69,13 @@ export const generateEmailFile = async (items) => {
     sections: [{
       children: [
         new Paragraph({
-          text: "Verkeersbesluiten Overzicht",
-          heading: HeadingLevel.HEADING_1,
+          text: "Hoi collega's,",
+          spacing: { after: 200 }
         }),
-        new Paragraph({ text: "" }), // Spacer
+        new Paragraph({
+          text: "Zouden jullie de nieuwe verkeersbesluiten aub op onze website (https://www.utrecht.nl/wonen-en-leven/duurzame-stad/vervoer/elektrisch-vervoer/openbare-laadpalen) kunnen publiceren? Dank weer!",
+          spacing: { after: 400 }
+        }),
         new Table({
           rows: tableRows,
           width: { size: 100, type: WidthType.PERCENTAGE }
@@ -67,6 +85,6 @@ export const generateEmailFile = async (items) => {
   });
 
   const blob = await Packer.toBlob(doc);
-  saveAs(blob, `verkeersbesluiten_tabel_${new Date().toISOString().split('T')[0]}.docx`);
+  saveAs(blob, `Redactie_mail_${new Date().toISOString().split('T')[0]}.docx`);
   console.log("Email table document generated!");
 };

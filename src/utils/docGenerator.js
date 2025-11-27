@@ -69,31 +69,6 @@ export const generateWordDoc = async (items) => {
     const blob = await Packer.toBlob(doc);
     console.log("Blob created, size:", blob.size, "bytes");
 
-    // Create a proper blob with correct MIME type
-    const properBlob = new Blob([blob], {
-        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    });
-
-    // Add timestamp to filename
-    const timestamp = new Date().toISOString().split('T')[0];
-    const filename = `Verkeersbesluiten_${timestamp}.docx`;
-
-    console.log("Triggering download:", filename);
-
-    // Use manual download link for better compatibility
-    const url = URL.createObjectURL(properBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-
-    // Cleanup
-    setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }, 100);
-
-    console.log("Download triggered!");
+    saveAs(blob, `Wijkbericht_${new Date().toISOString().split('T')[0]}.docx`);
+    console.log("Word document generated!");
 };

@@ -17,6 +17,7 @@ function App() {
   const [processedResults, setProcessedResults] = useState([])
   const [processing, setProcessing] = useState(false)
   const [logs, setLogs] = useState([])
+  const [motivationalMessage, setMotivationalMessage] = useState('')
 
   const addLog = (message, type = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
@@ -72,10 +73,6 @@ function App() {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    if (files.length > 50) {
-      alert("Maximum 50 files allowed.");
-      return;
-    }
 
     setOcrLoading(true); // Reuse loading state
     addLog(`Processing ${files.length} Word files...`, 'info');
@@ -117,6 +114,21 @@ function App() {
     setProcessedResults([]);
     setLogs([]); // Clear previous logs on new run
     addLog(`Starting batch process for ${addresses.length} addresses...`, 'info');
+
+    const motivationalMessages = [
+      'JE KAN HET!',
+      'SAMEN HALEN WE ONZE DOELEN',
+      'BIJNA KLAAR...',
+      'GEWELDIG BEZIG!',
+      'NOG EVEN VOLHOUDEN!',
+      'TOP WERK!'
+    ];
+
+    let messageIndex = 0;
+    const messageInterval = setInterval(() => {
+      setMotivationalMessage(motivationalMessages[messageIndex % motivationalMessages.length]);
+      messageIndex++;
+    }, 2000);
 
     const results = [];
     const errors = [];
@@ -183,6 +195,8 @@ function App() {
       addLog(`Critical batch error: ${error.message}`, 'error');
       alert(`Error during batch processing: ${error.message}`);
     } finally {
+      clearInterval(messageInterval);
+      setMotivationalMessage('');
       setProcessing(false);
     }
   };
@@ -235,7 +249,7 @@ function App() {
               <div className="action-buttons">
                 <button onClick={() => { setAddresses([]); setImagePreview(null); setProcessedResults([]); setLogs([]); }}>Clear</button>
                 <button className="primary-btn" onClick={handleProcessAll} disabled={processing}>
-                  {processing ? 'Processing...' : 'Find & Process Decrees'}
+                  {processing ? 'Bezig...' : 'LET\'S GO! 🚀'}
                 </button>
               </div>
             </>
@@ -245,6 +259,14 @@ function App() {
         <div className="panel">
           <h2>2. Results & Downloads</h2>
 
+          {processing && (
+            <div className="loading-screen">
+              <div className="spinner-container">
+                <img src="/utrecht-logo.png" alt="Utrecht" className="spinning-logo" />
+              </div>
+              <h2 className="motivational-message">{motivationalMessage}</h2>
+            </div>
+          )}
           {/* Logs Section */}
           <div className="logs-container" style={{ maxHeight: '200px', overflowY: 'auto', background: '#f5f5f5', padding: '10px', marginBottom: '10px', borderRadius: '4px', fontSize: '0.9em' }}>
             {logs.length === 0 && <p style={{ color: '#888' }}>Process logs will appear here...</p>}
@@ -259,14 +281,13 @@ function App() {
             ))}
           </div>
 
-          {processedResults.length === 0 && !processing && <p>No results yet. Paste an image and click Process.</p>}
-          {processing && <p>Searching and parsing...</p>}
+          {processedResults.length === 0 && !processing && <p>Geen resultaten. Plak een afbeelding of upload Word bestanden en klik op LET'S GO!</p>}
 
-          {processedResults.length > 0 && (
+          {processedResults.length > 0 && !processing && (
             <>
               <div className="download-buttons">
-                <button onClick={() => generateWordDoc(processedResults)}>Download Word Report</button>
-                <button onClick={() => generateEmailFile(processedResults)}>Download Table (Word)</button>
+                <button onClick={() => generateWordDoc(processedResults)}>📄 Wijkbericht</button>
+                <button onClick={() => generateEmailFile(processedResults)}>📧 Redactie mail</button>
               </div>
               <ul className="results-list">
                 {processedResults.map((res, i) => (
