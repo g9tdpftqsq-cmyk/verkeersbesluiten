@@ -14,6 +14,8 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [processedResults, setProcessedResults] = useState([])
   const [processing, setProcessing] = useState(false)
+  const [progress, setProgress] = useState({ current: 0, total: 0 })
+  const [failedItems, setFailedItems] = useState([])
   const [logs, setLogs] = useState([])
   const [motivationalMessage, setMotivationalMessage] = useState('')
 
@@ -82,7 +84,9 @@ function App() {
 
     setProcessing(true);
     setProcessedResults([]);
+    setFailedItems([]);
     setLogs([]); // Clear previous logs on new run
+    setProgress({ current: 0, total: addresses.length });
     addLog(`Starting batch process for ${addresses.length} addresses...`, 'info');
 
     const motivationalMessages = [
@@ -104,7 +108,10 @@ function App() {
     const errors = [];
 
     try {
-      for (const address of addresses) {
+      for (let i = 0; i < addresses.length; i++) {
+        const address = addresses[i];
+        setProgress(prev => ({ ...prev, current: i + 1 }));
+
         try {
           // Search for just the street name (without E8c requirement)
           // We'll filter for E8c in the results
@@ -134,26 +141,27 @@ function App() {
               });
             } else {
               addLog(`Failed to parse details from ${bestMatch.url}`, 'error');
-              errors.push(`Parsing failed for: ${cleanAddress}`);
+              errors.push({ address: cleanAddress, reason: 'Parsing failed' });
             }
 
           } else {
             console.warn(`No results found for "${cleanAddress}"`);
-            errors.push(`No results for: ${cleanAddress}`);
+            errors.push({ address: cleanAddress, reason: 'No results found' });
           }
         } catch (itemError) {
           console.error(`Error processing "${address}":`, itemError);
           addLog(`Error processing "${address}": ${itemError.message}`, 'error');
-          errors.push(`Error processing ${address}: ${itemError.message}`);
+          errors.push({ address: address, reason: itemError.message });
         }
       }
 
       setProcessedResults(results);
+      setFailedItems(errors);
 
       // Show summary
       if (errors.length > 0) {
         addLog(`Completed with ${errors.length} errors.`, 'warning');
-        alert(`Processing completed:\n\n✓ Successfully processed: ${results.length} items\n\n⚠ Issues:\n${errors.join('\n')}`);
+        // Alert removed, showing in UI instead
       } else if (results.length === 0) {
         addLog('No matching announcements found.', 'error');
         alert('No matching announcements found for any of the addresses.\n\nTip: Make sure the date matches when the announcements were published.');
@@ -219,6 +227,9 @@ function App() {
                   <img src="/utrecht-logo.png" alt="Utrecht" className="spinning-logo" />
                 </div>
                 <h2 className="motivational-message">{motivationalMessage}</h2>
+                <p style={{ marginTop: '1rem', fontSize: '1.2rem', color: '#666' }}>
+                  Processing: {progress.current} / {progress.total}
+                </p>
               </div>
             )}
 
@@ -240,6 +251,19 @@ function App() {
                   ))}
                 </ul>
               </>
+            )}
+
+            {failedItems.length > 0 && !processing && (
+              <div style={{ marginTop: '2rem', borderTop: '2px solid #eee', paddingTop: '1rem' }}>
+                <h3 style={{ color: '#e74c3c' }}>Niet gelukt ({failedItems.length})</h3>
+                <ul className="results-list" style={{ listStyle: 'none', padding: 0 }}>
+                  {failedItems.map((item, i) => (
+                    <li key={i} style={{ borderLeft: '4px solid #e74c3c', background: '#fff5f5' }}>
+                      <strong>{item.address}</strong>: {item.reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         )}
