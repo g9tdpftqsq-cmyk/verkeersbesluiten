@@ -40,8 +40,26 @@ export const generateEmailFile = async (items) => {
     })
   ];
 
+  // Sort items: District first, then Address
+  const sortedItems = [...items].sort((a, b) => {
+    const districtA = (a.district || "").toLowerCase();
+    const districtB = (b.district || "").toLowerCase();
+
+    if (districtA < districtB) return -1;
+    if (districtA > districtB) return 1;
+
+    // If districts are equal, sort by address
+    const addressA = (a.address || "").toLowerCase();
+    const addressB = (b.address || "").toLowerCase();
+
+    if (addressA < addressB) return -1;
+    if (addressA > addressB) return 1;
+
+    return 0;
+  });
+
   // Data rows
-  items.forEach(item => {
+  sortedItems.forEach(item => {
     // Clean up address: remove extra spaces
     const cleanAddress = (item.address || "Niet gevonden").replace(/\s+/g, ' ').trim();
 
