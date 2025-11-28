@@ -30,29 +30,49 @@ export const generateWordDoc = async (items) => {
     });
 
     Object.keys(districts).sort().forEach(districtName => {
-        // District Heading
+        // District Heading: Arial 10, Bold, #cc0000
         children.push(
             new Paragraph({
-                text: districtName,
-                heading: HeadingLevel.HEADING_2,
-                spacing: { before: 400, after: 200 },
+                children: [
+                    new TextRun({
+                        text: districtName,
+                        bold: true,
+                        font: "Arial",
+                        size: 20, // 20 half-points = 10pt
+                        color: "cc0000",
+                    }),
+                ],
+                spacing: { before: 200, after: 200 }, // Add some spacing
             })
         );
 
-        // List of addresses in this district
+        // White line (empty paragraph)
+        children.push(new Paragraph({ text: "" }));
+
+        // List of addresses in this district: Arial 10, Black
         districts[districtName].forEach(item => {
             // Clean up address: remove extra spaces before opening parenthesis
             let cleanAddress = item.address.replace(/\s+\(/g, ' (');
 
             children.push(
                 new Paragraph({
-                    text: cleanAddress,
+                    children: [
+                        new TextRun({
+                            text: cleanAddress,
+                            font: "Arial",
+                            size: 20, // 20 half-points = 10pt
+                            color: "000000",
+                        }),
+                    ],
                     bullet: {
                         level: 0,
                     },
                 })
             );
         });
+
+        // Add an extra empty line after the list for separation between districts
+        children.push(new Paragraph({ text: "" }));
     });
 
     console.log("Creating document...");
