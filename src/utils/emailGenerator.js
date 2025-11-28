@@ -40,7 +40,7 @@ export const generateEmailFile = async (items) => {
     })
   ];
 
-  // Sort items: District first, then Address
+  // Sort items: District first, then Date
   const sortedItems = [...items].sort((a, b) => {
     const districtA = (a.district || "").toLowerCase();
     const districtB = (b.district || "").toLowerCase();
@@ -48,14 +48,12 @@ export const generateEmailFile = async (items) => {
     if (districtA < districtB) return -1;
     if (districtA > districtB) return 1;
 
-    // If districts are equal, sort by address
-    const addressA = (a.address || "").toLowerCase();
-    const addressB = (b.address || "").toLowerCase();
+    // If districts are equal, sort by date (newest first or oldest first? usually oldest first for lists)
+    // Let's go with oldest first (ascending)
+    const dateA = new Date(a.date || 0);
+    const dateB = new Date(b.date || 0);
 
-    if (addressA < addressB) return -1;
-    if (addressA > addressB) return 1;
-
-    return 0;
+    return dateA - dateB;
   });
 
   // Data rows
