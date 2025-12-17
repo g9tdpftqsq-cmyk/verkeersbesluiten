@@ -42,21 +42,24 @@ export const generateWordDoc = async (items) => {
                         color: "cc0000",
                     }),
                 ],
-                spacing: { before: 200, after: 200 }, // Add some spacing
+                spacing: { before: 200, after: 0 }, // Reduced after spacing
             })
         );
 
-        // White line (empty paragraph)
-        children.push(new Paragraph({ text: "" }));
-
         // List of addresses in this district: Arial 10, Black
         districts[districtName].forEach(item => {
-            // Clean up address: remove extra spaces before opening parenthesis
-            let cleanAddress = item.address.replace(/\s+\(/g, ' (');
+            // Clean up address: remove extra spaces
+            let cleanAddress = item.address.replace(/\s+/g, ' ').replace(/\s+\(/g, ' (');
 
             children.push(
                 new Paragraph({
                     children: [
+                        new TextRun({
+                            text: "•\t", // Manual bullet with tab
+                            font: "Arial",
+                            size: 20,
+                            color: "000000",
+                        }),
                         new TextRun({
                             text: cleanAddress,
                             font: "Arial",
@@ -64,8 +67,9 @@ export const generateWordDoc = async (items) => {
                             color: "000000",
                         }),
                     ],
-                    bullet: {
-                        level: 0,
+                    indent: {
+                        left: 720, // 0.5 inch
+                        hanging: 360, // 0.25 inch
                     },
                 })
             );
