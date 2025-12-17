@@ -46,6 +46,9 @@ export const generateWordDoc = async (items) => {
             })
         );
 
+        // White line (empty paragraph)
+        children.push(new Paragraph({ text: "" }));
+
         // List of addresses in this district: Arial 10, Black
         districts[districtName].forEach(item => {
             // Clean up address: remove extra spaces
